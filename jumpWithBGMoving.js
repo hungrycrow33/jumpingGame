@@ -1,9 +1,8 @@
-var context,  loop;
 var canvasHeight = Math.floor(window.innerHeight*0.6);
 var canvasWidth = Math.floor(window.innerWidth*0.7);
 var ground = 16;
 
-context = document.querySelector("canvas").getContext("2d");
+const context = document.querySelector("canvas").getContext("2d");
 
 const backgroundImg= new Image();
 backgroundImg.src = 'background.png';
@@ -176,6 +175,22 @@ class Background {
     }
 }
 
+class Enemy {
+    constructor(gameWidth,gameHeight){
+        this.gameWidth=gameWidth;
+        this.gameHeight=gameHeight;
+        this.height=80;
+        this.width=80;
+        this.image = document.getElementById("characterImg"); //TODO
+
+        this.x =0; //center of the canvas
+        this.y = this.gameHeight-this.height;
+    }
+    draw(ctx){
+        ctx.drawImage(this.image, this.x, this.y,this.width, this.height);
+    }
+}
+
 function resizeWindow() {
     context.clearRect(0,0,window.innerWidth,window.innerHeight);
     canvasHeight =  Math.floor(window.innerHeight*0.6);
@@ -183,38 +198,38 @@ function resizeWindow() {
     context.canvas.height = canvasHeight;
     context.canvas.width = canvasWidth;
 }
-function animate(bg,char,ctrl,ctx){
-    // background moving
-    bg.draw(ctx);
-    bg.update();
-    //jumping physics (make it jump when not)
-    char.update(ctrl);
-    //draw character
-    char.draw(ctx);
- }
+
 const background = new Background(canvasWidth, canvasHeight);
 const character = new Character(canvasWidth, canvasHeight);
 const controller = new Controller();
+const enemy1 = new Enemy(canvasWidth, canvasHeight);
 
-
-loop = function(){//merging the controller logic with physics
+function animationLoop(){//merging the controller logic with physics
     //context.clearRect(0,0,window.innerWidth,window.innerHeight);
     resizeWindow();
+    // background moving
+    background.draw(context);
+    background.update();
+    //jumping physics (make it jump when not)
+    character.update(controller);
+    //draw character
+    character.draw(context);
+   
+    //draw enemy
+    enemy1.draw(context);
 
-    animate(background,character,controller,context);
     context.save(); //?
     context.restore();
     
     //call the loop function again when the browser is ready to draw again
-    window.requestAnimationFrame(loop);
+    window.requestAnimationFrame(animationLoop);
 };
 
 //adding eventListener to th e window(obj)
 //whenever that event is fired, exectue the controller.keyListener function
-
 window.addEventListener("keydown", controller.keyListener);
 window.addEventListener("keyup", controller.keyListener);
-window.requestAnimationFrame(loop);
+window.requestAnimationFrame(animationLoop);
 
 //////////////////////////////////////////////////////////////////////
 //character selection//TODO
