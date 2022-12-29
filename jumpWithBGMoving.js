@@ -1,26 +1,39 @@
 var canvasHeight = Math.floor(window.innerHeight*0.6);
 var canvasWidth = Math.floor(window.innerWidth*0.7);
 var ground = 16;
+var gameOver = false;
+
+var game={
+    over:false,
+    reset:false
+}
 
 const context = document.querySelector("canvas").getContext("2d");
+
+const charImg= new Image();
+charImg.src = 'soju.png';
 
 const backgroundImg= new Image();
 backgroundImg.src = 'background.png';
 
+const enemyImg= new Image();
+enemyImg.src = 'enemySS.png';
+
 context.canvas.height = canvasHeight;
 context.canvas.width = canvasWidth;
 
+var enemies =[];
 
 class Character {
     constructor(gameWidth,gameHeight){ //gameHeight= canvasHeight
         this.gameWidth=gameWidth;
         this.gameHeight=gameHeight;
 
-        this.height=80;
-        this.width=80;
-        this.image=document.getElementById("characterImg");
+        this.height=100;
+        this.width=100;
+        this.image=charImg//document.getElementById("characterImg");
 
-        this.x =parseInt(gameWidth/2); //center of the canvas
+        this.x = this.width*2//parseInt(gameWidth/2); //center of the canvas
         this.y = gameHeight;
         this.xVelocity=0; //velocity of the character
         this.yVelocity=0;
@@ -30,33 +43,50 @@ class Character {
         this.doubleJumping= false;
     }
     draw(ctx){
+        //for collision detection
+        context.strokeStyle='white';
+        context.strokeRect(this.x, this.y, this.width, this.height);
+
         if (this.doubleJumping){
             //move the origin of matrix to center of image
             //context.translate(character.x+character.width, character.y);
             const time = new Date();
             let centerW =this.x + this.width/2;
             let centerH = this.y + this.height/2;
+            ctx.save();
             ctx.translate(centerW, centerH);
             ctx.rotate(((2 * Math.PI) / 180) * time.getMilliseconds());
             //time.getSeconds());
             // + ((2 * Math.PI) / 6000) * time.getMilliseconds());
             //(90* Math.PI / 180);
+            
+            
             ctx.translate(-centerW, -centerH);
+            
            }
         ctx.drawImage(this.image, this.x, this.y,this.width, this.height);
+        ctx.restore();
     }
-    update(ctrl){
+    update(ctrl, enem){
+        //collision detection
+        var dx = enem.x -this.x;//(enem.x + enem.width/2) - (this.x + this.width/2);
+        var dy = enem.y -this.y;//(enem.y + enem.height/2) - (this.y + this.height/2);
+        var distance = Math.sqrt(dx*dx + dy*dy);
+        if (distance <enem.width/2 +this.width/2) {
+            game.over =true;
+        }
+
         //jumping physics (make it jump when not)
         if (ctrl.up && this.jumping == false){
-            this.yVelocity -= 20;
+            this.yVelocity -= 30;
             this.jumping = true; 
-            this.image.style.transform = 'rotate(90deg)';
+            //this.image.style.transform = 'rotate(90deg)';
             //console.log("activate jumping "+ canvasWidth+ " "+canvasHeight);
         }
         // double jumping
         if (ctrl.up && this.jumping && this.jumpCount > 1 && this.doubleJumping==false){
             this.doubleJumping = true;
-            this.yVelocity -= 20;
+            this.yVelocity -= 30;
             // console.log("double jumping");
         }
         
@@ -96,6 +126,15 @@ class Character {
         else if(this.x > this.gameWidth){
             this.x = -this.width;
         }
+        
+    }
+    reset(){
+        // reset to initial state
+        this.x = 20;
+        this.y =this.gameHeight; 
+        this.jumping=false;
+        this.jumpCount=0;
+        this.doubleJumping= false;
     }
 }
 
@@ -155,11 +194,11 @@ class Background {
         //this.images = [bg1,bg2,bg3,bg4,bg5];
         this.image =backgroundImg;//document.getElementById("backgroundImg");//backgroundImg;
         
-        this.x = 0
+        this.x = 0;
         this.y = 0;
-        this.width = 1000
-        this.height = 600
-        this.speed = 10
+        this.width = 1000;
+        this.height = 600;
+        this.speed = 5;
     }
     draw(ctx){
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
@@ -173,6 +212,10 @@ class Background {
         this.x-= this.speed;
         if(this.x < 0 -this.width) this.x=0;
     }
+    reset(){
+        this.x = 0;
+        this.y = 0;
+    }
 }
 
 class Enemy {
@@ -181,16 +224,61 @@ class Enemy {
         this.gameHeight=gameHeight;
         this.height=80;
         this.width=80;
-        this.image = document.getElementById("characterImg"); //TODO
+        this.image = enemyImg;//document.getElementById("characterImg"); //TODO
 
-        this.x =0; //center of the canvas
+        this.x =gameWidth; //center of the canvas
         this.y = this.gameHeight-this.height;
+        this.xVelocity=0; //velocity of the character
+        this.yVelocity=0;
+        this.speed=5;
+
+        this.frameX = 0;
+        this.maxFrame = 6;
+        this.fps = 1;
+        this.frameTimer = 0;
+        this.frameInterval = 1000/this.fps;
     }
     draw(ctx){
-        ctx.drawImage(this.image, this.x, this.y,this.width, this.height);
+        //for collision detection
+        context.strokeStyle='white';
+        context.strokeRect(this.x, this.y, this.width, this.height);
+
+        ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y,this.width, this.height);
+    }
+    update(){
+        //if (this.frameTimer > this.frameInterval){
+            if (this.frameX >= this.maxFrame){
+                this.frameX=0;
+            }else{
+                this.frameX ++;
+            }
+        //}
+        
+
+        this.x -= this.speed;
+        //when leftmost
+        if(this.x < -this.width){ 
+            this.x = this.gameWidth;
+        }
+        //when rightmost
+        else if(this.x > this.gameWidth){
+            this.x = -this.width;
+        }
+    }
+    reset(){
+        this.x =gameWidth; //center of the canvas
+        this.y = this.gameHeight-this.height;
     }
 }
+function handleEnemies(){
+    enemies.push()
+}
 
+function displayStatusText(context){
+    if(game.over){
+
+    }
+}
 function resizeWindow() {
     context.clearRect(0,0,window.innerWidth,window.innerHeight);
     canvasHeight =  Math.floor(window.innerHeight*0.6);
@@ -211,18 +299,26 @@ function animationLoop(){//merging the controller logic with physics
     background.draw(context);
     background.update();
     //jumping physics (make it jump when not)
-    character.update(controller);
+    character.update(controller, enemy1);
     //draw character
     character.draw(context);
    
     //draw enemy
     enemy1.draw(context);
-
+    enemy1.update();
     context.save(); //?
     context.restore();
     
+    // if (game.reset){
+    //     character.reset();
+    //     enemy1.reset();
+    //     background.reset();
+    // }
+
     //call the loop function again when the browser is ready to draw again
-    window.requestAnimationFrame(animationLoop);
+    if (!game.over){
+        window.requestAnimationFrame(animationLoop);
+    }
 };
 
 //adding eventListener to th e window(obj)
@@ -235,6 +331,13 @@ window.requestAnimationFrame(animationLoop);
 //character selection//TODO
 const element = document.getElementById("char1");
 element.addEventListener("click", selectCharacter);
+
+function restartGame(){
+    game.reset = true;
+    game.over= false;
+    location.reload();
+    //window.requestAnimationFrame(animationLoop);
+}
 
 function selectCharacter() {
   //document.getElementById("demo").innerHTML = "Hello World" + jumpCount;
