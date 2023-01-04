@@ -13,14 +13,32 @@
     <h1>Endless Jumping Game</h1>
     <h3>무한 점핑 게임</h3>
     <div id="select">
-      <button id="char1">1</button>
-      <button id="char2">2</button>
-      <button id="restart" onclick="restartGame()">restart</button>
-      <div id="demo"></div>
+      <div><p>캐릭터를 고르세요</p></div>
+      <div id="character-options">
+        
+        <div class="options">
+          <img id="eyes" width="60" height="60" src="./src/characters/eyes.png"
+          onclick="getCharImg(this.id)">
+        </div>
+        <div class="options">
+          <img id="soju" width="60" height="60" src="./src/characters/soju.png"
+          onclick="getCharImg(this.id)">
+        </div>
+        <div class="options">
+          <img id="noname" width="60" height="60" src="./src/characters/noname.png"
+          onclick="getCharImg(this.id)">
+        </div>
+        <div class="options">
+          <img id="bbungs" width="60" height="60" src="./src/characters/bbung.png"
+          onclick="getCharImg(this.id)">
+        </div>
+      </div>
     </div>
+    <button id="restart" onclick="restartGame()">restart</button>
     <p id="checker"></p>
 
     <canvas>
+
     </canvas>
 
     <script src = "jumpWithBGMoving.js" type = "text/javascript"></script>

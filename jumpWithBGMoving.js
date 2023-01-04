@@ -7,7 +7,9 @@ var game={
     over:false,
     reset:false,
     score: 0,
-    lastScore: 0
+    lastScore: 0,
+    level: 0,
+    notStarted: true
 }
 
 const context = document.querySelector("canvas").getContext("2d");
@@ -118,17 +120,6 @@ class Character {
         ctx.restore();
     }
     update(ctrl, enemies){
-        //collision detection
-        enemies.forEach(enem =>{
-            var dx = enem.x -this.x;//(enem.x + enem.width/2) - (this.x + this.width/2);
-            var dy = enem.y -this.y;//(enem.y + enem.height/2) - (this.y + this.height/2);
-            var distance = Math.sqrt(dx*dx + dy*dy);
-            if (distance <enem.width/2 +this.width/2) {
-            game.over =true;
-            }
-        })
-        
-
         //jumping physics (make it jump when not)
         if (ctrl.up && this.jumping == false){
             this.yVelocity -= 25;
@@ -212,15 +203,20 @@ class Background {
         // ctx.drawImage(this.images[4], this.x+this.width*4 - this.speed, this.y, this.width, this.height);
     }
     update(){
+        // when score goes up -> speed up
         if (game.lastScore == 0 && game.score >= 30 ){
-            this.speed =this.speed*1.5;
+            game.speed =game.speed*1.5;
+            this.speed = game.speed;
             game.lastScore = game.score;
-            console.log("updated: me ", this.speed);
+            game.level ++;
+            
         }
         else if (game.lastScore != 0 && game.score > game.lastScore*2){
-            this.speed =this.speed*1.5;
+            game.speed =game.speed*1.5;
+            this.speed = game.speed;
             game.lastScore = game.score;
-            console.log("updated: ", this.speed);
+            game.level ++;
+            //console.log(game.level);
         }
         this.x-= this.speed;
         if(this.x < 0 -this.width) this.x=0;
@@ -231,20 +227,20 @@ class Background {
     }
 }
 class Enemy {
-    constructor(gameWidth,gameHeight,type){
+    constructor(gameWidth,gameHeight, horizontal=0, vertical =0){
         this.gameWidth=gameWidth;
         this.gameHeight=gameHeight;
         this.height=60;
         this.width=60;
         this.image = enemyImg;//document.getElementById("characterImg"); //TODO
-        this.type = type; // number of enemies
-        this.shape = Math.floor(Math.random() * 2); //0:horizontal, 1:vertical
+        // this.type = type; // number of enemies
+        // this.shape = shape; //0:horizontal, 1:vertical
 
+        this.x =gameWidth + horizontal*this.width; //center of the canvas
+        this.y = (this.gameHeight - this.height - 16) - vertical*this.height;
+        this.horizontal = horizontal;
+        this.vertical= vertical;
 
-        this.x =gameWidth; //center of the canvas
-        this.y = this.gameHeight - this.height - 16;
-        this.collisionX=this.x;
-        this.collisionY=this.y;
         this.xVelocity=0; //velocity of the character
         this.yVelocity=0;
         this.speed=6;
@@ -256,38 +252,15 @@ class Enemy {
         this.frameTimer = 0;
         this.frameInterval = 1000/this.fps;
         this.markDelete = false;
-
-        if (this.type == 2 && this.shape==0){
-            this.collisionX=this.x+this.width;
-        }else if(this.type==2 && this.shape==1){
-            this.collisionY=this.y - this.height;
-        }else if(this.type==3){
-            this.collisionY=this.y - this.height*2;
-        }    
     }
     draw(ctx){
-        //for collision detection
+        // //for collision detection
         // context.strokeStyle='white';
         // context.strokeRect(this.x, this.y, this.width, this.height);
-        if (this.type == 1){
-            ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y,this.width, this.height);
-        }else if(this.type ==2){
-            if (this.shape){
-                ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y,this.width, this.height);
-                ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x+this.width, this.y,this.width, this.height);
-            }else{
-                ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y,this.width, this.height);
-                ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y-this.height,this.width, this.height);
-            }
-            
-        }else{
-            ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y,this.width, this.height);
-            ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y-this.height,this.width, this.height);
-            ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y-this.height*2,this.width, this.height);
-        }
-        
+
+        ctx.drawImage(this.image, this.frameX*300, 0, 300, 300, this.x, this.y,this.width, this.height);
     }
-    update(){
+    update(characterObj){
         //if (this.frameTimer > this.frameInterval){
             if (this.frameX >= this.maxFrame){
                 this.frameX=0;
@@ -295,22 +268,34 @@ class Enemy {
                 this.frameX ++;
             }
         //}
+        //collision detection
+        
+        var dx = this.x -characterObj.x;//(enem.x + enem.width/2) - (this.x + this.width/2);
+        var dy = this.y -characterObj.y;//(enem.y + enem.height/2) - (this.y + this.height/2);
+        var distanceThresh = Math.sqrt(dx*dx + dy*dy);
+
+        if (distanceThresh <this.width/2 + characterObj.width/2) {
+            game.over =true;
+        }
     
         this.x -= this.speed*this.randSpeed;
         if (game.lastScore == 0 && game.score >= 30 ){
             this.speed =this.speed*1.5;
             game.lastScore = game.score;
-            console.log("updated: me ", this.speed);
+            game.level ++;
+            console.log(game.level);
         }
         else if (game.lastScore != 0 && game.score > game.lastScore*2){
             this.speed =this.speed*1.5;
             game.lastScore = game.score;
-            console.log("updated: ", this.speed);
+            console.log(game.level);
         }
 
         if(this.x < 0-this.width){
             this.markDelete = true;
-            game.score += this.type*5;
+            var type = Math.max(this.horizontal, this.vertical)+1;
+            
+            game.score += type*5;
         }
     }
     reset(){
@@ -319,28 +304,40 @@ class Enemy {
     }
 }
 
+function createEnemies(type){
+    if(type == 1){
+        enemies.push(new Enemy(canvasWidth, canvasHeight));
+    }else if(type == 2){
+        // push 2 enemies, either vertical or horizontakl
+        randShape = Math.floor(Math.random() * 2);
+        enemies.push(new Enemy(canvasWidth, canvasHeight)); 
+        if (randShape){ //0: horizontal
+            enemies.push(new Enemy(canvasWidth, canvasHeight,1,0));
+        }else{ //1: vertical
+            enemies.push(new Enemy(canvasWidth, canvasHeight,0,1));
+        }
+    }else{ 
+        // push 3 enemies ( 2 verticals)
+        enemies.push(new Enemy(canvasWidth, canvasHeight));
+        enemies.push(new Enemy(canvasWidth, canvasHeight,0,1));
+        enemies.push(new Enemy(canvasWidth, canvasHeight,0,2));
+    }
+}
 
-// setInterval(displayHello, 1000);
-
-// function displayHello() {
-//   document.getElementById("demo").innerHTML += "Hello";
-// }
-
-function handleEnemies(){
-
+function handleEnemies(characterObj){
     if (enemyTimer > enemyInterval+randomInterval){
-        let randType = Math.floor(Math.random() * 9);
-        if(randType <4){
-            enemies.push(new Enemy(canvasWidth, canvasHeight,1));
-        } else if(4 <= randType&& randType <=6){
-            enemies.push(new Enemy(canvasWidth, canvasHeight,2));
-        }else{
-            enemies.push(new Enemy(canvasWidth, canvasHeight,3));
+        let randType = Math.floor(Math.random() * 8);
+        if(randType <3){ //one enemy
+            createEnemies(1);
+        } else if(3 <= randType&& randType <=5){ // two enemies
+            createEnemies(2);
+        }else{ //three enemies
+            createEnemies(3);
         }
         
         enemyTimer=0;
-        randomInterval = Math.random()*1000+500;
-    enemyInterval = Math.random()*500+1000;
+        randomInterval = Math.random()*1000+100;
+        enemyInterval = Math.random()*500+500;
         
     } else{
         enemyTimer += 16; //deltaTime
@@ -348,7 +345,7 @@ function handleEnemies(){
     // Math.floor(Math.random() * 10);
     enemies.forEach(enemy =>{
         enemy.draw(context);
-        enemy.update();
+        enemy.update(characterObj);
         
     })
     enemies =enemies.filter(en =>!en.markDelete);
@@ -359,7 +356,18 @@ function displayStatusText(ctx){
     ctx.font = '30px Gerogia'
     ctx.fillText ('Score: '+game.score, this.canvasWidth-200,50);
 
+    var checkLevel = game.lastScore;
+    if (checkLevel != game.lastScore){
+        console.log("level up", game.level);
+    ctx.fillStyle = 'white';
+    ctx.font = '30px Gerogia'
+    ctx.fillText ('Level Up!', this.canvasWidth/2-30,50);
+    checkLevel = game.lastScore;
+    }
+    //ctx.textAlign ='center';
+
     if(game.over){
+        game.notStarted = true;
         ctx.fillStyle='black';
         ctx.fillRect( 0, 100, canvasWidth, 120);
         ctx.textAlign ='center';
@@ -387,15 +395,17 @@ enemies.push(new Enemy(canvasWidth, canvasHeight,1));
 
 let lastTime = 0;
 let enemyTimer = 0;
-let enemyInterval = 2000;
+let enemyInterval = 1400;
 let randomInterval = Math.random()*1000+500;
 
 function animationLoop(){//merging the controller logic with physics
     //const deltaTime = timeStamp - lastTime;
-
-
     //context.clearRect(0,0,window.innerWidth,window.innerHeight);
     resizeWindow();
+
+    if(!game.notStarted && game.over){
+        location.reload();
+    }
     // background moving
     background.draw(context);
     background.update();
@@ -407,7 +417,7 @@ function animationLoop(){//merging the controller logic with physics
     //draw enemy
     // enemy1.draw(context);
     // enemy1.update();
-    handleEnemies();
+    handleEnemies(character);
     context.save(); //?
     context.restore();
 
@@ -425,16 +435,40 @@ function animationLoop(){//merging the controller logic with physics
     }
 };
 
+function beforeGameState(ctx){
+    background.draw(ctx);
+    character.draw(ctx);
+    
+        window.addEventListener('keyup',event=>{
+            if(event.code==="Space" && game.notStarted){
+                game.notStarted = false;
+                window.requestAnimationFrame(animationLoop);
+            }
+        })
+    
+}
+
 //adding eventListener to th e window(obj)
 //whenever that event is fired, exectue the controller.keyListener function
 window.addEventListener("keydown", controller.keyListener);
 window.addEventListener("keyup", controller.keyListener);
-window.requestAnimationFrame(animationLoop);
+beforeGameState(context);
+// window.requestAnimationFrame(animationLoop);
 
+// window.addEventListener("keydown", (event)=> {
+//     if(event.keyCode === 32){
+//     console.log("spoace");
+//     window.requestAnimationFrame(animationLoop);
+//     }
+// })
+function getCharImg(id){
+    console.log(id);
+    charImg.src = './src/characters/' + id + '.png';
+}
 //////////////////////////////////////////////////////////////////////
 //character selection//TODO
 const element = document.getElementById("char1");
-element.addEventListener("click", selectCharacter);
+//element.addEventListener("click", selectCharacter);
 
 function restartGame(){
     game.reset = true;
