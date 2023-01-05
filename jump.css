@@ -1,0 +1,37 @@
+body {
+    text-align: center;
+    /* background-color: rgb(19, 6, 80); */
+    font-family: 'Georgia'/*'Courier New', monospace;*/
+}
+
+/* #backgroundImgae{
+    display: none;
+} */
+canvas{
+    background-color: rgb(19, 6, 80);
+    
+}
+#select{
+    display: flex;
+    flex-direction: column;
+    width:70vw;
+    margin-left: 15vw;
+    background-color: rgb(216, 216, 216);
+}
+#character-options{
+    display: flex;
+    flex-direction: row;
+    margin-left: 15vw;
+} 
+
+.options{
+    border:1px solid rgb(255, 255, 255);
+    margin: 10px ;
+}
+
+.options:hover{
+    background-color: white;
+    size: 10%;
+    border:1px solid rgb(255, 255, 255);
+    margin: 10px ;
+}
