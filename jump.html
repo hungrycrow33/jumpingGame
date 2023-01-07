@@ -13,24 +13,27 @@
     <h1>Endless Jumping Game</h1>
     <h3>무한 점핑 게임</h3>
     <div id="select">
-      <div><p>캐릭터를 고르세요</p></div>
+      <div id="character-title"><p>캐릭터를 고르세요</p></div>
       <div id="character-options">
-        
         <div class="options">
-          <img id="eyes" width="60" height="60" src="./src/characters/eyes.png"
-          onclick="getCharImg(this.id)">
+          <img id="eyes" width="80" height="80" src="./src/characters/eyes.png"
+          onclick="getCharImg(this.id, this)">
+          <p>맑눈광푸너</p>
         </div>
         <div class="options">
-          <img id="soju" width="60" height="60" src="./src/characters/soju.png"
-          onclick="getCharImg(this.id)">
+          <img id="soju" width="80" height="80" src="./src/characters/soju.png"
+          onclick="getCharImg(this.id, this)">
+          <p>쇠주</p>
         </div>
         <div class="options">
-          <img id="noname" width="60" height="60" src="./src/characters/noname.png"
-          onclick="getCharImg(this.id)">
+          <img id="noname" width="80" height="80" src="./src/characters/noname.png"
+          onclick="getCharImg(this.id, this)">
+          <p>하트</p>
         </div>
         <div class="options">
-          <img id="bbungs" width="60" height="60" src="./src/characters/bbung.png"
-          onclick="getCharImg(this.id)">
+          <img id="bbungs" width="80" height="80" src="./src/characters/bbung.png"
+          onclick="getCharImg(this.id, this)">
+          <p>뿡뿡헤</p>
         </div>
       </div>
     </div>

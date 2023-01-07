@@ -16,22 +16,55 @@ canvas{
     flex-direction: column;
     width:70vw;
     margin-left: 15vw;
-    background-color: rgb(216, 216, 216);
+    /* background-color: rgb(233, 233, 233); */
+    border-radius: 8px;
+  /* padding: 5px; */
+  border: 2px solid rgb(47, 20, 169);
+  padding: 6px;;
 }
 #character-options{
     display: flex;
     flex-direction: row;
-    margin-left: 15vw;
+    /* margin-left: 10%; */
+    /* text-align: center; */
+    margin-left: auto;
+  margin-right: auto;
+} 
+#character-title p{
+    margin-top: 0;
+    margin-bottom: 0;
 } 
 
 .options{
+    text-align: center;
     border:1px solid rgb(255, 255, 255);
-    margin: 10px ;
+    background-color: rgb(255, 255, 255);
+    margin-left: 10px ;
+    margin-right: 10px ;
+    border-radius: 8px;
+  padding: 5px;
+}
+.options{
+    opacity: 0.5;
+}
+.options:hover{
+    opacity: 1;
+}
+.options p{
+    margin-top:0;
+    margin-bottom: 0;
 }
 
 .options:hover{
     background-color: white;
-    size: 10%;
-    border:1px solid rgb(255, 255, 255);
-    margin: 10px ;
+    
+    /* border:1px solid rgb(50, 53, 194); */
+    /* margin: 10px ; */
+    background-color: rgba(0, 55, 255, 0.109);
 }
+
+#selected{
+    opacity: 1;
+    background-color: rgba(0, 55, 255, 0.306);
+}
+

@@ -14,7 +14,7 @@ var game={
 
 const context = document.querySelector("canvas").getContext("2d");
 
-const charImg= new Image();
+var charImg= new Image();
 charImg.src = './src/characters/eyes.png';
 
 const backgroundImg= new Image();
@@ -461,9 +461,23 @@ beforeGameState(context);
 //     window.requestAnimationFrame(animationLoop);
 //     }
 // })
-function getCharImg(id){
+function getCharImg(id, element){
     console.log(id);
     charImg.src = './src/characters/' + id + '.png';
+
+    
+
+    options = document.getElementsByClassName("options");
+    for (i = 0; i < options.length; i++) {
+        options[i].id = "";
+    //   options[i].style.backgroundColor = "";
+    //   options[i].style.opacity = 0.5;
+    }
+    element.parentElement.id = "selected"; 
+    console.log(element.parentElement.id)
+    // element.parentElement.style.backgroundColor = 'rgb(180, 180, 180)';
+    // element.style.opacity = 1;
+
 }
 //////////////////////////////////////////////////////////////////////
 //character selection//TODO
